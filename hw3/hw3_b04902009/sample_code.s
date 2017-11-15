@@ -11,9 +11,9 @@
 # TODO : change the file name/path to access the files
 # NOTE : Before you submit the code, make sure these two fields are "input.txt" and "output.txt"
 	file_in:
-		.asciiz	"/Users/eiffel1428/Desktop/hw3/hw3_b04902009/input.txt"
+		.asciiz	"input.txt"
 	file_out:
-		.asciiz	"/Users/eiffel1428/Desktop/hw3/hw3_b04902009/output.txt"
+		.asciiz	"output.txt"
 		
 # the following data is only for sample demonstration		
 	output_ascii:	
