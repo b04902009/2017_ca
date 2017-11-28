@@ -1,19 +1,12 @@
 module Control(
     Op_i,
-    RegDst_o,
     ALUOp_o,
-    ALUSrc_o,
-    RegWrite_o,
-    Jump_o,
-    Branch_o,
-    MemRead_o,
-    MemWrite_o,
-    MemtoReg_o
+    ctrl_signal
 );
 
 input	[5:0]		Op_i;
 output	[1:0]		ALUOp_o;
-output 				RegDst_o, ALUSrc_o, MemtoReg_o, RegWrite_o, MemWrite_o, MemRead_o, Branch_o, Jump_o;
+output	[9:0]		ctrl_signal;
 reg		[9:0]		ctrl_signal;
 
 always @(Op_i) begin
@@ -33,10 +26,10 @@ always @(Op_i) begin
 		6'h02: // jump
 			ctrl_signal <= {2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1};
 		default:
-		 	ctrl_signal <= 5'd0;
+		 	ctrl_signal <= 10'd0;
 	endcase
 end
-
+assign	ALUOp_o = ctrl_signal[9:8];
 /*
 Instruction	Opcode			ALUOp		RegDst	ALUSrc	MemtoReg	RegWrite	MemWrite	MemRead	Branch	Jump
 R-type		000000(0x00)	11(Rtype)	1		0		0			1			0			0		0		0
@@ -48,15 +41,4 @@ beq			000100(0x04)	01(sub)		x		0		x			0			0			0		1		0
 ori			001101(0x0D)	10(or)		0		1		0			1			0			0		0		0
 jump		000010(0x02)	X			x		x		x			0			0			0		0		1
 */
-
-assign	ALUOp_o = ctrl_signal[9:8];
-assign	RegDst_o = ctrl_signal[7];
-assign	ALUSrc_o = ctrl_signal[6];
-assign	MemtoReg_o = ctrl_signal[5];
-assign	RegWrite_o = ctrl_signal[4];
-assign	MemWrite_o = ctrl_signal[3];
-assign	MemtoReg_o = ctrl_signal[2];
-assign	Branch_o = ctrl_signal[1];
-assign	Jump_o = ctrl_signal[0];
-
 endmodule
