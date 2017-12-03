@@ -21,4 +21,10 @@ assign	data_o = (ALUCtrl_i == 3'b000)?	data1_i & data2_i :
 
 assign	Zero_o = (data1_i == data2_i)?	1'b1 : 1'b0;
 
+// always @(data_o) begin
+//     $display("ALU-data1_i: %b", data1_i);
+//     $display("ALU-data2_i: %b", data2_i);
+//     $display("ALU-data_o: %b", data_o);
+// end
+
 endmodule

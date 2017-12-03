@@ -133,7 +133,7 @@ ALU_Control ALU_Control(
     .ALUCtrl_o  (ALU.ALUCtrl_i)
 );
 
-always @* begin
+always @(ctrl_sig) begin
     RegDst <= ctrl_sig[7];
     ALUSrc <= ctrl_sig[6];
     MemtoReg <= ctrl_sig[5];

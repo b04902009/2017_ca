@@ -11,5 +11,8 @@ output  [31:0]      instr_o;
 reg     [31:0]     memory  [0:255]; // Declaration of 256 32-bit registers
 
 assign  instr_o = memory[addr_i>>2];  
+// always @(*) begin
+// 	$display("Instruction_Memory-instr: %b", instr_o);
+// end
 
 endmodule

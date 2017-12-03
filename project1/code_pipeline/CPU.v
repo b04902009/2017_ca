@@ -5,18 +5,26 @@ module CPU(
 );
 
 // Ports
-input           clk_i;
-input           rst_i;
-input           start_i;
+input               clk_i;
+input               rst_i;
+input               start_i;
 
-wire    [31:0]  inst_addr, inst;
-wire    [9:0]   ctrl_sig;
-reg             RegDst, ALUSrc, MemtoReg, RegWrite, MemWrite, MemRead, Branch, Jump;
-wire            Zero;
-
+wire    [31:0]      inst_addr, inst;
+wire                Zero;
+wire    [9:0]       ctrl_sig;
+reg                 RegDst, ALUSrc, MemtoReg, RegWrite, MemWrite, MemRead, Branch, Jump;
+wire    [3:0]       IDEX_sig;
+reg                 IDEX_ALUSrc, IDEX_RegDst;
+reg     [1:0]       IDEX_ALUOp;
+wire    [1:0]       EXMEM_sig;
+reg                 EXMEM_MemRead, EXMEM_MemWrite;
+wire    [1:0]       MEMWB_sig;
+reg                 MEMWB_MemtoReg, MEMWB_RegWrite;
+wire    [31:0]      MUXforward2_data;
 
 IFID IFID(
     .clk_i      (clk_i),
+    .rst_i      (rst_i),
     .pc_i       (),               // from Add_PC.data_o
     .hazard_i   (),               // from HazardDetection.IDIFhazard_o
     .flush_i    (),               // from Flush.flush_o
@@ -27,9 +35,10 @@ IFID IFID(
 
 IDEX IDEX(
     .clk_i      (clk_i),
-    .WB_i       (),               //
-    .M_i        (),               // from MUX_Control
-    .EX_i       (),               // 
+    .rst_i      (rst_i),
+    .WB_i       (),               // from MUX_Control.WB_o
+    .M_i        (),               // from MUX_Control.M_o
+    .EX_i       (),               // from MUX_Control.EX_o
     .data1_i    (),               // from Registers.RSdata_o
     .data2_i    (),               // from Registers.RTdata_o
     .signextend_i(Sign_Extend.data_o),
@@ -38,12 +47,10 @@ IDEX IDEX(
     .rd_i       (inst[15:11]),
     .WB_o       (EXMEM.WB_i),
     .M_o        (EXMEM.M_i),
-    .ALUSrc_o   (MUX32_2.select_i),
-    .ALUOp_o    (ALU_Control.ALUOp_i),
-    .RegDst_o   (MUX5.select_i),
+    .EX_o       (IDEX_sig),
     .data1_o    (MUXforward_1.data_i),
     .data2_o    (MUXforward_2.data_i),
-    .signextend_o(MUX32_2.data2_i),
+    .signextend_o(MUX32.data2_i),
     .rs_o       (ForwardUnit.IDEX_RS_i),
     .rt_o       (MUX5.data1_i),
     .rd_o       (MUX5.data2_i)
@@ -51,14 +58,14 @@ IDEX IDEX(
 
 EXMEM EXMEM(
     .clk_i      (clk_i),
+    .rst_i      (rst_i),
     .WB_i       (),                // from IDEX.WB_o  
     .M_i        (),                // from IDEX.M_o
     .addr_i     (),                // from ALU.data_o
-    .data_i     (),                // MUXforward_2.data_o
+    .data_i     (MUXforward2_data),
     .rd_i       (),                // from MUX5.data_o
     .WB_o       (MEMWB.WB_i),
-    .MemRead_o  (DataMemory.MemRead_i),
-    .MemWrite_o (DataMemory.MemWrite_i),
+    .M_o        (EXMEM_sig),
     .addr_o     (DataMemory.addr_i),
     .data_o     (DataMemory.Writedata_i),
     .rd_o       (MEMWB.rd_i)
@@ -66,12 +73,12 @@ EXMEM EXMEM(
 
 MEMWB MEMWB(
     .clk_i      (clk_i),
+    .rst_i      (rst_i),
     .WB_i       (),                // from EXMEM.WB_o
-    .addr_i     (),                // from EXMEM.addr_o
-    .data_i     (),                // from EXMEM.data_o
+    .addr_i     (EXMEM.addr_o),                // from EXMEM.addr_o
+    .data_i     (),                // from DataMemory.Readdata_o
     .rd_i       (),                // from EXMEM.rd_o
-    .MemtoReg_o (MUX_Write.select_i),
-    .RegWrite_o (Registers.RegWrite_i),
+    .WB_o       (MEMWB_sig),
     .addr_o     (MUX_Write.data1_i),
     .data_o     (MUX_Write.data2_i),
     .rd_o       (Registers.RDaddr_i)
@@ -82,7 +89,7 @@ ForwardUnit ForwardUnit(
     .IDEX_RT_i  (IDEX.rt_o),
     .EXMEM_RegWrite_i(EXMEM.WB_o[1]),
     .EXMEM_RD_i (EXMEM.rd_o),
-    .MEMWB_RegWrite_i(MEMWB.RegWrite_o),
+    .MEMWB_RegWrite_i(MEMWB_RegWrite),
     .MEMWB_RD_i (MEMWB.rd_o),
     .Forward1_o (MUXforward_1.select_i),
     .Forward2_o (MUXforward_2.select_i)
@@ -101,7 +108,7 @@ MUXForward MUXforward_2(
     .data_i     (),              // from IDEX.data2_o
     .EXMEM_addr_i(EXMEM.addr_o),
     .MEMWB_data_i(MUX_Write.data_o),
-    .data_o     (EXMEM.data_i)
+    .data_o     (MUXforward2_data)
 );
 
 HazardDetection HazardDetection(
@@ -132,7 +139,7 @@ MUX_Jump MUX_Jump(
 MUX_Write MUX_Write(
     .data1_i    (),                // from MEMWB.addr_o
     .data2_i    (),                // from MEMWB.data_o               
-    .select_i   (),                // from MEMWB.MemtoReg_o
+    .select_i   (MEMWB_MemtoReg),
     .data_o     (Registers.RDdata_i)                
 );
 
@@ -140,8 +147,8 @@ DataMemory DataMemory(
     .clk_i      (clk_i),
     .addr_i     (),               // from EXMEM.addr_o
     .Writedata_i(),               // from EXMEM.data_o               
-    .MemRead_i  (),               // from EXMEM.MemRead_o
-    .MemWrite_i (),               // from EXMEM.MemWrite_o
+    .MemRead_i  (EXMEM_MemRead),
+    .MemWrite_i (EXMEM_MemWrite),
     .Readdata_o (MEMWB.data_i)
 );
 
@@ -181,11 +188,10 @@ Instruction_Memory Instruction_Memory(
     .instr_o    (IFID.inst_i)
 );
 
-
 MUX5 MUX5(
     .data1_i    (),                // from IDEX.rt_o
     .data2_i    (),                // from IDEX.rd_o
-    .select_i   (),                // from IDEX.RegDst_o
+    .select_i   (IDEX_RegDst),
     .data_o     (EXMEM.rd_i)
 );
 
@@ -195,7 +201,7 @@ Registers Registers(
     .RTaddr_i   (inst[20:16]),
     .RDaddr_i   (),                // from MEMWB.rd_o 
     .RDdata_i   (),                // from MUX_Write.data_o
-    .RegWrite_i (),                // from MEMWB.RegWrite_o
+    .RegWrite_i (MEMWB_RegWrite),
     .RSdata_o   (IDEX.data1_i), 
     .RTdata_o   (IDEX.data2_i) 
 );
@@ -232,10 +238,10 @@ Sign_Extend Sign_Extend(
     .data_o     (ShiftLeft32.data_i)
 );
 
-MUX32 MUX32_2(
-    .data1_i    (),                // from MUXForward2.data_o
+MUX32 MUX32(
+    .data1_i    (MUXforward2_data),
     .data2_i    (),                // from IDEX.signextend_o
-    .select_i   (),                // from IDEX.ALUSrc_o
+    .select_i   (IDEX_ALUSrc),
     .data_o     (ALU.data2_i)
 );
 
@@ -250,9 +256,13 @@ ALU ALU(
 
 ALU_Control ALU_Control(
     .funct_i    (IDEX.signextend_o[5:0]),
-    .ALUOp_i    (),                // from IDEX.ALUOP_o              
+    .ALUOp_i    (IDEX_ALUOp),      
     .ALUCtrl_o  (ALU.ALUCtrl_i)
 );
+
+always @(inst) begin
+    $display("CPU-Op: %b", inst[31:26]);
+end
 
 always @(ctrl_sig) begin
     RegDst <= ctrl_sig[7];
@@ -263,6 +273,22 @@ always @(ctrl_sig) begin
     MemRead <= ctrl_sig[2];
     Branch <= ctrl_sig[1];
     Jump <= ctrl_sig[0];
+end
+
+always @(IDEX_sig) begin
+    IDEX_ALUSrc <= IDEX_sig[3];
+    IDEX_ALUOp <= IDEX_sig[2:1];
+    IDEX_RegDst <= IDEX_sig[0];
+end
+
+always @(EXMEM_sig) begin
+    EXMEM_MemRead <= IDEX_sig[1];
+    EXMEM_MemWrite <= IDEX_sig[0];
+end
+
+always @(MEMWB_sig) begin
+    MEMWB_RegWrite <= IDEX_sig[1];
+    MEMWB_MemtoReg <= IDEX_sig[0];
 end
 
 endmodule

@@ -1,5 +1,4 @@
-module PC
-(
+module PC(
     clk_i,
     rst_i,
     start_i,
@@ -21,11 +20,12 @@ reg     [31:0]      pc_o;
 
 
 always@(posedge clk_i or negedge rst_i) begin
+    // $display("hazard: %b", hazard_i);
     if(~rst_i) begin
         pc_o <= 32'b0;
     end
     else begin
-        if(start_i & (~hazard_i))
+        if(start_i & (!hazard_i))
             pc_o <= pc_i;
         else
             pc_o <= pc_o;

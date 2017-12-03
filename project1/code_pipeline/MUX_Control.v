@@ -22,7 +22,7 @@ reg     [1:0]       WB_o, M_o;
 reg     [3:0]       EX_o;
 
 always @(hazard_i or RegDst_i or ALUSrc_i or MemtoReg_i or RegWrite_i or MemWrite_i or MemRead_i or ALUOp_i) begin
-    if (hazard_i) begin
+    if(hazard_i) begin
         WB_o <= 2'b00;
         M_o <= 2'b00;
         EX_o <= 4'b00;

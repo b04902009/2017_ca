@@ -42,4 +42,8 @@ beq			000100(0x04)	01(sub)		x		0		x			0			0			0		1		0
 ori			001101(0x0D)	10(or)		0		1		0			1			0			0		0		0
 jump		000010(0x02)	X			x		x		x			0			0			0		0		1
 */
+
+always@(*) begin
+	$display("Control-Op_i: %b", Op_i);
+end
 endmodule
