@@ -1,5 +1,5 @@
 module CPU(
-    clk_i, 
+    clk_i,
     rst_i,
     start_i
 );
