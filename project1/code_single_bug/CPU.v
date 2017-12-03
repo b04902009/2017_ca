@@ -5,19 +5,16 @@ module CPU(
 );
 
 // Ports
-input           clk_i;
-input           rst_i;
-input           start_i;
+input               clk_i;
+input               rst_i;
+input               start_i;
 
-wire    [31:0]  inst_addr, inst;
-wire    [9:0]   ctrl_sig;
-
-reg             RegDst, ALUSrc, MemtoReg, RegWrite, MemWrite, MemRead, Branch, Jump;
+wire    [31:0] inst_addr, inst;
 
 MUX_Add MUX_Add(
     .data1_i    (Add_PC.data_o),
     .data2_i    (),               // from Add_address.data_o
-    .select_i   (Branch),
+    .Branch_i   (),               // from Control.Branch_o
     .Zero_i     (),               // from ALU.Zero_o
     .data_o     (MUX_Jump.data2_i)
 );
@@ -26,23 +23,15 @@ MUX_Jump MUX_Jump(
     .data1_28_i (),               // from ShiftLeft26.data_o
     .data1_32_i (Add_PC.data_o),
     .data2_i    (),               // from MUX_Add.data_o
-    .select_i     (Jump),
+    .Jump_i     (),               // from Control.Jump_o
     .data_o     (PC.pc_i)
 );
 
 MUX_Write MUX_Write(
     .data1_i    (),               // from DataMemory.Readdata_o
     .data2_i    (ALU.data_o),               
-    .select_i (MemtoReg),
+    .MemtoReg_i (Control.MemWrite_o),
     .data_o     (Registers.RDdata_i)                
-);
-
-DataMemory DataMemory(
-    .addr_i     (),               // from ALU.data_o
-    .Writedata_i(Registers.RTdata_o),               
-    .MemRead_i  (MemRead),
-    .MemWrite_i (MemWrite),
-    .Readdata_o (MUX_Write.data1_i)
 );
 
 ShiftLeft26 ShiftLeft26(
@@ -84,7 +73,7 @@ Instruction_Memory Instruction_Memory(
 MUX5 MUX5(
     .data1_i    (inst[20:16]),
     .data2_i    (inst[15:11]),
-    .select_i   (RegDst),
+    .select_i   (),                // from Control.RegDst_o
     .data_o     (Registers.RDaddr_i)
 );
 
@@ -94,15 +83,32 @@ Registers Registers(
     .RTaddr_i   (inst[20:16]),
     .RDaddr_i   (),                // from MUX5.data_o 
     .RDdata_i   (),                // from MUX_Write.data_o
-    .RegWrite_i (RegWrite),
+    .RegWrite_i (),                // from Control.RegWrite_o
     .RSdata_o   (ALU.data1_i), 
     .RTdata_o   (MUX32.data1_i) 
 );
 
+wire     MemRead, MemWrite;
+
 Control Control(
     .Op_i       (inst[31:26]),
+    .RegDst_o   (MUX5.select_i),
     .ALUOp_o    (ALU_Control.ALUOp_i),
-    .ctrl_signal(ctrl_sig)
+    .ALUSrc_o   (MUX32.select_i),
+    .RegWrite_o (Registers.RegWrite_i),
+    .Jump_o     (MUX_Jump.Jump_i),
+    .Branch_o   (MUX_Add.Branch_i),
+    .MemRead_o  (MemRead),
+    .MemWrite_o (MemWrite),
+    .MemtoReg_o (MUX_Write.MemtoReg_i)
+);
+
+DataMemory DataMemory(
+    .addr_i     (),               // from ALU.data_o
+    .Writedata_i(Registers.RTdata_o),               
+    .MemRead_i  (MemRead),               // Control.MemRead_o
+    .MemWrite_i (MemWrite),               // Control.MemWrite_o
+    .Readdata_o (MUX_Write.data1_i)
 );
 
 Sign_Extend Sign_Extend(
@@ -113,7 +119,7 @@ Sign_Extend Sign_Extend(
 MUX32 MUX32(
     .data1_i    (),                // from Registers.RTdata_o
     .data2_i    (),                // from Sign_Extend.data_o
-    .select_i   (ALUSrc),
+    .select_i   (),                // from Control.ALUSrc_o
     .data_o     (ALU.data2_i)
 );
 
@@ -128,20 +134,9 @@ ALU ALU(
 
 ALU_Control ALU_Control(
     .funct_i    (inst[5:0]),
-    .ALUOp_i    (),
+    .ALUOp_i    (),                // from Control.ALUOp_o
     .ALUCtrl_o  (ALU.ALUCtrl_i)
 );
-
-always @* begin
-    RegDst <= ctrl_sig[7];
-    ALUSrc <= ctrl_sig[6];
-    MemtoReg <= ctrl_sig[5];
-    RegWrite <= ctrl_sig[4];
-    MemWrite <= ctrl_sig[3];
-    MemRead <= ctrl_sig[2];
-    Branch <= ctrl_sig[1];
-    Jump <= ctrl_sig[0];
-end
 
 endmodule
 

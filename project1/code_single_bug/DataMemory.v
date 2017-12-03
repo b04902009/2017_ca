@@ -16,26 +16,23 @@ reg		[31:0]	Readdata_o;
 always @(addr_i or Writedata_i or MemRead_i or MemWrite_i) begin
 	if (MemRead_i) begin
 		Readdata_o <= {memory[addr_i+3], memory[addr_i+2], memory[addr_i+1], memory[addr_i]};
-		/*Readdata_o[7:0] <= memory[addr_i];
-		Readdata_o[15:8] <= memory[addr_i+1];
-		Readdata_o[23:16] <= memory[addr_i+2];
-		Readdata_o[31:24] <= memory[addr_i+3];*/
-		$display("addr: %b", addr_i);
-		$display("In Readdata: %b", memory[addr_i]);		
+		//Readdata_o[7:0] <= memory[addr_i];
+		//Readdata_o[15:8] <= memory[addr_i+1];
+		//Readdata_o[23:16] <= memory[addr_i+2];
+		//Readdata_o[31:24] <= memory[addr_i+3];		
 	end
 	if (MemWrite_i) begin
 		memory[addr_i] = Writedata_i[7:0];
 		memory[addr_i+1] = Writedata_i[15:8];
 		memory[addr_i+2] = Writedata_i[23:16];
 		memory[addr_i+3] = Writedata_i[31:24];
-		$display("addr: %b", addr_i);
-		$display("In Write: %b", memory[addr_i]);
+		//$display("%b", Writedata_i[7:0]);
 	end
-	/*
+	
 	$display("DataMemory-MemWrite: %b", MemWrite_i);
 	$display("DataMemory-MemRead: %b", MemRead_i);
-	$display("%b%b%b%b", Writedata_i[31:24], Writedata_i[23:16], Writedata_i[15:8], Writedata_i[7:0]);
-	*/
+	$display("Writedata:%b", Writedata_i[7:0]);
+	
 end
 
 endmodule
