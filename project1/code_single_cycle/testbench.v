@@ -43,7 +43,7 @@ initial begin
     outfile = $fopen("output.txt") | 1;
     
     // Set Input n into data memory at 0x00
-    //CPU.DataMemory.memory[0] = 8'h5;       // n = 5 for example
+    CPU.DataMemory.memory[0] = 8'h5;       // n = 5 for example
     
     Clk = 1;
     Reset = 0;
@@ -58,7 +58,7 @@ end
   
 always@(posedge Clk) begin
 
-    if(counter == 10)    // stop after 30 cycles
+    if(counter == 18)    // stop after 18 cycles
         $stop;
         
     // print PC
