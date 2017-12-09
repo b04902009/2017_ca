@@ -11,11 +11,12 @@ input               start_i;
 
 wire    [31:0]      inst_addr, inst;
 wire                Zero;
-wire    [9:0]       ctrl_sig;
-reg                 RegDst, ALUSrc, MemtoReg, RegWrite, MemWrite, MemRead, Branch, Jump;
+// wire    [9:0]       ctrl_sig;
+// reg                 ALUOp, RegDst, ALUSrc, MemtoReg, RegWrite, MemWrite, MemRead;
+wire                Branch, Jump;
 wire    [3:0]       IDEX_sig;
-reg                 IDEX_ALUSrc, IDEX_RegDst;
-reg     [1:0]       IDEX_ALUOp;
+// reg                 IDEX_ALUSrc, IDEX_RegDst;
+// reg     [1:0]       IDEX_ALUOp;
 wire    [1:0]       EXMEM_sig;
 reg                 EXMEM_MemRead, EXMEM_MemWrite;
 wire    [1:0]       MEMWB_sig;
@@ -75,7 +76,7 @@ MEMWB MEMWB(
     .clk_i      (clk_i),
     .rst_i      (rst_i),
     .WB_i       (),                // from EXMEM.WB_o
-    .addr_i     (EXMEM.addr_o),                // from EXMEM.addr_o
+    .addr_i     (EXMEM.addr_o),    // from EXMEM.addr_o
     .data_i     (),                // from DataMemory.Readdata_o
     .rd_i       (),                // from EXMEM.rd_o
     .WB_o       (MEMWB_sig),
@@ -195,7 +196,7 @@ Instruction_Memory Instruction_Memory(
 MUX5 MUX5(
     .data1_i    (),                // from IDEX.rt_o
     .data2_i    (),                // from IDEX.rd_o
-    .select_i   (IDEX_RegDst),
+    .select_i   (IDEX_sig[0]),     // IDEX_RegDst
     .data_o     (EXMEM.rd_i)
 );
 
@@ -212,13 +213,14 @@ Registers Registers(
 
 MUX_Control MUX_Control(
     .hazard_i   (),                // from HazardDetection.MUX_Control_hazard_o
-    .RegDst_i   (RegDst),
-    .ALUOp_i    (),                // from Control.ALUOp_o
-    .ALUSrc_i   (ALUSrc),
-    .RegWrite_i (RegWrite),
-    .MemRead_i  (MemRead),
-    .MemWrite_i (MemWrite),
-    .MemtoReg_i (MemtoReg),
+    .ctrl_sig_i (),                // from Control.ctrl_signal
+    // .RegDst_i   (RegDst),
+    // .ALUOp_i    (),                // from Control.ALUOp_o
+    // .ALUSrc_i   (ALUSrc),
+    // .RegWrite_i (RegWrite),
+    // .MemRead_i  (MemRead),
+    // .MemWrite_i (MemWrite),
+    // .MemtoReg_i (MemtoReg),
     .WB_o       (IDEX.WB_i),
     .M_o        (IDEX.M_i),
     .EX_o       (IDEX.EX_i)
@@ -226,8 +228,10 @@ MUX_Control MUX_Control(
 
 Control Control(
     .Op_i       (inst[31:26]),
-    .ALUOp_o    (MUX_Control.ALUOp_i),
-    .ctrl_signal(ctrl_sig)
+    // .ALUOp_o    (MUX_Control.ALUOp_i),
+    .ctrl_signal_o(MUX_Control.ctrl_sig_i),
+    .branch_o   (Branch),
+    .jump_o     (Jump)
 );
 
 Flush Flush(
@@ -245,7 +249,7 @@ Sign_Extend Sign_Extend(
 MUX32 MUX32(
     .data1_i    (MUXforward2_data),
     .data2_i    (),                // from IDEX.signextend_o
-    .select_i   (IDEX_ALUSrc),
+    .select_i   (IDEX_sig[3]),     // IDEX_ALUSrc
     .data_o     (ALU.data2_i)
 );
 
@@ -260,7 +264,7 @@ ALU ALU(
 
 ALU_Control ALU_Control(
     .funct_i    (IDEX.signextend_o[5:0]),
-    .ALUOp_i    (IDEX_ALUOp),      
+    .ALUOp_i    (IDEX_sig[2:1]),      // IDEX_ALUOp
     .ALUCtrl_o  (ALU.ALUCtrl_i)
 );
 
@@ -268,29 +272,30 @@ always @(inst) begin
     $display("CPU-Op: %b", inst[31:26]);
 end
 
-always @(ctrl_sig) begin
-    RegDst <= ctrl_sig[7];
-    ALUSrc <= ctrl_sig[6];
-    MemtoReg <= ctrl_sig[5];
-    RegWrite <= ctrl_sig[4];
-    MemWrite <= ctrl_sig[3];
-    MemRead <= ctrl_sig[2];
-    Branch <= ctrl_sig[1];
-    Jump <= ctrl_sig[0];
-end
+// always @(ctrl_sig) begin
+//     ALUOp_o <= ctrl_signal[9:8];
+//     RegDst <= ctrl_sig[7];
+//     ALUSrc <= ctrl_sig[6];
+//     MemtoReg <= ctrl_sig[5];
+//     RegWrite <= ctrl_sig[4];
+//     MemWrite <= ctrl_sig[3];
+//     MemRead <= ctrl_sig[2];
+//     Branch <= ctrl_sig[1];
+//     Jump <= ctrl_sig[0];
+// end
 
-always @(IDEX_sig) begin
-    IDEX_ALUSrc <= IDEX_sig[3];
-    IDEX_ALUOp <= IDEX_sig[2:1];
-    IDEX_RegDst <= IDEX_sig[0];
-end
+// always @(IDEX_sig) begin
+//     IDEX_ALUSrc <= IDEX_sig[3];
+//     IDEX_ALUOp <= IDEX_sig[2:1];
+//     IDEX_RegDst <= IDEX_sig[0];
+// end
 
 always @(EXMEM_sig) begin
     EXMEM_MemRead <= EXMEM_sig[1];
     EXMEM_MemWrite <= EXMEM_sig[0];
 end
 
-always @(MEMWB_sig) begin
+always @(posedge clk_i) begin
     MEMWB_RegWrite <= MEMWB_sig[1];
     MEMWB_MemtoReg <= MEMWB_sig[0];
 end

@@ -1,35 +1,44 @@
 module Control(
     Op_i,
-    ALUOp_o,
-    ctrl_signal
+    ctrl_signal_o,
+    branch_o,
+    jump_o
 );
 
 input	[5:0]		Op_i;
-output	[1:0]		ALUOp_o;
-output	[9:0]		ctrl_signal;
-reg		[9:0]		ctrl_signal;
+output	reg			branch_o, jump_o;
+output	[9:0]		ctrl_signal_o;
+reg		[9:0]		ctrl_signal_o;
 
 always @(*) begin
+	branch_o = 1'd0;
+	jump_o = 1'd0;
 	case(Op_i)
 		6'h00: // R-type
-			ctrl_signal <= {2'b11, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
+			ctrl_signal_o <= {2'b11, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
 		6'h08: // addi
-			ctrl_signal <= {2'b00, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
+			ctrl_signal_o <= {2'b00, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
 		6'h23: // lw
-			ctrl_signal <= {2'b00, 1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0};
+			ctrl_signal_o <= {2'b00, 1'b0, 1'b1, 1'b1, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0};
 		6'h2B: // sw
-			ctrl_signal <= {2'b00, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0};
+			ctrl_signal_o <= {2'b00, 1'b0, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0};
 		6'h04: // beq
-			ctrl_signal <= {2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0};
+			begin
+			ctrl_signal_o <= {2'b01, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0};
+			branch_o = 1'd1;
+			end
 		6'h0D:  //ori
-			ctrl_signal <= {2'b10, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
+			ctrl_signal_o <= {2'b10, 1'b0, 1'b1, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
 		6'h02: // jump
-			ctrl_signal <= {2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1};
+			begin
+			ctrl_signal_o <= {2'b00, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1};
+			jump_o = 1'd1;
+			end
 		default:
-		 	ctrl_signal <= 10'd0;
+		 	ctrl_signal_o <= 10'd0;
 	endcase
 end
-assign	ALUOp_o = ctrl_signal[9:8];
+
 
 /*
 Instruction	Opcode			ALUOp		RegDst	ALUSrc	MemtoReg	RegWrite	MemWrite	MemRead	Branch	Jump
