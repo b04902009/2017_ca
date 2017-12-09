@@ -1,22 +1,13 @@
 module MUX_Control(
     hazard_i,
     ctrl_sig_i,
-    // RegDst_i,
-    // ALUOp_i,
-    // ALUSrc_i,
-    // RegWrite_i,
-    // MemRead_i,
-    // MemWrite_i,
-    // MemtoReg_i,
     WB_o,
     M_o,
     EX_o       
 );
 
 input               hazard_i;
-// input   [1:0]       ALUOp_i;
 input   [9:0]       ctrl_sig_i;
-// reg     [9:0]       ctrl_sig_i;
 reg                 RegDst, ALUSrc, MemtoReg, RegWrite, MemWrite, MemRead;
 reg     [1:0]       ALUOp;
 

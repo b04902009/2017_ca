@@ -30,7 +30,7 @@ always@(posedge clk_i or negedge rst_i) begin
 	else if(!hazard_i) begin
 		pc_o <= pc_i;
 		inst_o <= inst_i;
-		$display("inst: %b", inst_o);
+		// $display("inst: %b", inst_o);
 	end
 	else begin
 		$display("Hazard!");
