@@ -24,10 +24,8 @@ reg     [4:0]       rd_o;
 reg     [31:0]      addr_o, data_o;
 
 
-//always@(posedge clk_i or negedge rst_i) begin
-always@(posedge clk_i) begin
+always@(posedge clk_i or data_i) begin
     if(~rst_i) begin
-        // $display("initialize MEMWB");
         WB_o <= 0;
         addr_o <= 0;
         data_o <= 0;
@@ -39,10 +37,6 @@ always@(posedge clk_i) begin
     	data_o <= data_i;
     	rd_o <= rd_i;
     end
-end
-
-always @(data_o) begin
-    $display("MEMWB-data: %b", data_o);
 end
 
 endmodule

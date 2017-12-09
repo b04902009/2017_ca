@@ -28,10 +28,10 @@ assign  RSdata_o = register[RSaddr_i];
 assign  RTdata_o = register[RTaddr_i];
 
 // Write Data 
-// Change Posedge to Negedge : By hortune  
 always@(negedge clk_i) begin
-    if(RegWrite_i)
+    if(RegWrite_i) begin
         register[RDaddr_i] <= RDdata_i;
+    end
 end
    
 endmodule 

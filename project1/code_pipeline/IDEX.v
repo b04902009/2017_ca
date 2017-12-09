@@ -40,7 +40,6 @@ reg		[3:0]		EX_o;
 
 always@(posedge clk_i or negedge rst_i) begin
 	if(~rst_i) begin
-		// $display("initialize IDEX");
 		WB_o <= 0;
 		M_o <= 0;
 		EX_o <= 0;
@@ -62,9 +61,6 @@ always@(posedge clk_i or negedge rst_i) begin
 		rt_o <= rt_i;
 		rd_o <= rd_i;
 	end
-end
-always @(data2_o) begin
-    $display("IDEX-data: %b", data2_o);
 end
 
 endmodule
