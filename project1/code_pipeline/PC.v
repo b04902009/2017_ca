@@ -18,6 +18,9 @@ output  [31:0]      pc_o;
 // Wires & Registers
 reg     [31:0]      pc_o;
 
+initial begin 
+    pc_o = 0;
+end
 
 always@(posedge clk_i or negedge rst_i) begin
     // $display("hazard: %b", hazard_i);
@@ -27,9 +30,13 @@ always@(posedge clk_i or negedge rst_i) begin
     else begin
         if(start_i & (!hazard_i))
             pc_o <= pc_i;
-        else
-            pc_o <= pc_o;
+        //else
+        //    pc_o <= pc_o;
     end
 end
 
-endmodule
+endmodule 
+
+
+// MODIFY BY HORTUNE
+// ADD INITIALIZATION

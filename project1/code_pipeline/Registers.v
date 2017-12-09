@@ -27,8 +27,9 @@ reg     [31:0]      register        [0:31];
 assign  RSdata_o = register[RSaddr_i];
 assign  RTdata_o = register[RTaddr_i];
 
-// Write Data   
-always@(posedge clk_i) begin
+// Write Data 
+// Change Posedge to Negedge : By hortune  
+always@(negedge clk_i) begin
     if(RegWrite_i)
         register[RDaddr_i] <= RDdata_i;
 end

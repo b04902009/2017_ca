@@ -41,15 +41,15 @@ reg		[3:0]		EX_o;
 always@(posedge clk_i or negedge rst_i) begin
 	if(~rst_i) begin
 		// $display("initialize IDEX");
-		WB_o = 0;
-		M_o = 0;
-		EX_o = 0;
-		data1_o = 0;
-		data2_o = 0;
-		signextend_o = 0;
-		rs_o = 0;
-		rt_o = 0;
-		rd_o = 0;
+		WB_o <= 0;
+		M_o <= 0;
+		EX_o <= 0;
+		data1_o <= 0;
+		data2_o <= 0;
+		signextend_o <= 0;
+		rs_o <= 0;
+		rt_o <= 0;
+		rd_o <= 0;
 	end
 	else begin
 		WB_o <= WB_i;

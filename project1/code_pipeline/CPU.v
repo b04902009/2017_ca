@@ -79,8 +79,8 @@ MEMWB MEMWB(
     .data_i     (),                // from DataMemory.Readdata_o
     .rd_i       (),                // from EXMEM.rd_o
     .WB_o       (MEMWB_sig),
-    .addr_o     (MUX_Write.data1_i),
-    .data_o     (MUX_Write.data2_i),
+    .addr_o     (MUX_Write.data2_i), // here makes mistake ..
+    .data_o     (MUX_Write.data1_i),
     .rd_o       (Registers.RDaddr_i)
 );
 
@@ -161,19 +161,22 @@ ShiftLeft32 ShiftLeft32(
     .data_i     (),               // from Sign_Extend.data_o
     .data_o     (Add_address.data2_in)
 );
-
+// OK
 Adder Add_address(
     .data1_in   (),               // from IFID.pc_o
     .data2_in   (),               // from ShiftLeft32.data_o
     .data_o     (MUX_Add.data2_i)
 );
 
+// OK
 Adder Add_PC(
     .data1_in   (inst_addr),
     .data2_in   (32'd4),
     .data_o     (IFID.pc_i)
 );
 
+
+//OK
 PC PC(
     .clk_i      (clk_i),
     .rst_i      (rst_i),
@@ -182,6 +185,7 @@ PC PC(
     .pc_i       (),                // from MUX_Jump.data_o
     .pc_o       (inst_addr)
 );
+
 
 Instruction_Memory Instruction_Memory(
     .addr_i     (inst_addr), 
@@ -282,13 +286,13 @@ always @(IDEX_sig) begin
 end
 
 always @(EXMEM_sig) begin
-    EXMEM_MemRead <= IDEX_sig[1];
-    EXMEM_MemWrite <= IDEX_sig[0];
+    EXMEM_MemRead <= EXMEM_sig[1];
+    EXMEM_MemWrite <= EXMEM_sig[0];
 end
 
 always @(MEMWB_sig) begin
-    MEMWB_RegWrite <= IDEX_sig[1];
-    MEMWB_MemtoReg <= IDEX_sig[0];
+    MEMWB_RegWrite <= MEMWB_sig[1];
+    MEMWB_MemtoReg <= MEMWB_sig[0];
 end
 
 endmodule

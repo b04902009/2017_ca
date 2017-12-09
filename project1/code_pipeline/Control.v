@@ -9,7 +9,7 @@ output	[1:0]		ALUOp_o;
 output	[9:0]		ctrl_signal;
 reg		[9:0]		ctrl_signal;
 
-always @(Op_i) begin
+always @(*) begin
 	case(Op_i)
 		6'h00: // R-type
 			ctrl_signal <= {2'b11, 1'b1, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
