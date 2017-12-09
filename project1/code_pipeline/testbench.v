@@ -69,11 +69,15 @@ always@(posedge Clk) begin
         $stop;
 
     // put in your own signal to count stall and flush
-    if(CPU.HazardDetection.MUX_Control_hazard_o == 0 && Jump == 0 && Branch == 0)
+    
+    /*if(CPU.HazardDetection.MUX_Control_hazard_o == 0 && Jump == 0 && Branch == 0)
         stall = stall + 1;
     if(CPU.Flush.flush_o == 1)
         flush = flush + 1;  
-
+    */
+    // put in your own signal to count stall and flush
+    if(CPU.HazardDetection.MUX_Control_hazard_o == 1 && CPU.Control.ctrl_signal[0] == 0 && CPU.Control.ctrl_signal[1] == 0)stall = stall + 1;
+    if(CPU.Flush.flush_o == 1)flush = flush + 1;  
     // print PC
     $fdisplay(outfile, "cycle = %d, Start = %d, Stall = %d, Flush = %d\nPC = %d", counter, Start, stall, flush, CPU.PC.pc_o);
     
