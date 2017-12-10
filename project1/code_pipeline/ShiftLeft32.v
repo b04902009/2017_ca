@@ -9,7 +9,7 @@ output	[31:0]		data_o;
 reg		[31:0]  	data_o;
 
 always @(data_i) begin
-	data_o = data_o << 2;
+	data_o = data_i << 2;
 end
 
 endmodule
