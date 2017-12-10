@@ -57,7 +57,7 @@ initial begin
 end
   
 always@(negedge Clk) begin
-    if(counter == 70)    // stop after 70 cycles
+    if(counter == 30)    // stop after 70 cycles
         $stop;
 
     // put in your own signal to count stall and flush
@@ -66,7 +66,7 @@ always@(negedge Clk) begin
     if(CPU.Flush.flush_o == 1)
         flush = flush + 1;  
     // print PC
-    $fdisplay(outfile, "cycle = %d, Start = %d, Stall = %d, Flush = %d\nPC = %d", counter, Start, stall, flush, CPU.PC.pc_o);
+    $fdisplay(outfile, "cycle = %d, Start = %d, Stall = %-1d, Flush = %-1d\nPC = %d", counter, Start, stall, flush, CPU.PC.pc_o);
     
     // print Registers
     $fdisplay(outfile, "Registers");
