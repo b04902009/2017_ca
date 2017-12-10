@@ -17,8 +17,4 @@ assign	hazard_o = ((inst_i[25:21] == rt_i)|(inst_i[20:16] == rt_i))? MemRead_i :
 assign	IFIDhazard_o = hazard_o;
 assign	MUX_Control_hazard_o = hazard_o;
 
-// always@(*) begin
-//     $display("hazard_o: %b", hazard_o);
-// end
-
 endmodule

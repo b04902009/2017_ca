@@ -18,22 +18,16 @@ reg 	[31:0]		pc_o, inst_o;
 
 always@(posedge clk_i or negedge rst_i) begin
 	if(~rst_i) begin
-		// $display("initialize IFID");
 		pc_o = 32'b0;
 		inst_o = 32'b0;
 	end
 	else if(flush_i) begin
-		$display("Flush!");
 		pc_o <= 32'b0;
 		inst_o <= 32'b0;
 	end
 	else if(!hazard_i) begin
 		pc_o <= pc_i;
 		inst_o <= inst_i;
-		// $display("inst: %b", inst_o);
-	end
-	else begin
-		$display("Hazard!");
 	end
 end
 

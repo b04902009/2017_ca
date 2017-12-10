@@ -55,26 +55,11 @@ initial begin
     $dumpfile("gg.vcd");
     $dumpvars;
 end
-
-// wire    [9:0]   ctrl_sig;
-// reg             Jump, Branch;
-
-// always @(ctrl_sig) begin
-//     Branch <= ctrl_sig[1];
-//     Jump <= ctrl_sig[0];
-// end
   
 always@(negedge Clk) begin
-    if(counter == 20)    // stop after 20 cycles
+    if(counter == 70)    // stop after 70 cycles
         $stop;
 
-    // put in your own signal to count stall and flush
-    
-    /*if(CPU.HazardDetection.MUX_Control_hazard_o == 0 && Jump == 0 && Branch == 0)
-        stall = stall + 1;
-    if(CPU.Flush.flush_o == 1)
-        flush = flush + 1;  
-    */
     // put in your own signal to count stall and flush
     if(CPU.HazardDetection.MUX_Control_hazard_o == 1 && CPU.Control.jump_o == 0 && CPU.Control.branch_o == 0)
         stall = stall + 1;

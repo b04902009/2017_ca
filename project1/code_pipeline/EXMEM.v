@@ -28,7 +28,6 @@ reg     [31:0]      addr_o, data_o;
 
 always@(posedge clk_i or negedge rst_i) begin
     if(~rst_i) begin
-        // $display("initialize EXMEM");
         WB_o <= 0;
         M_o <= 0;
         addr_o <= 0;
@@ -42,9 +41,6 @@ always@(posedge clk_i or negedge rst_i) begin
         data_o <= data_i;
         rd_o <= rd_i;
     end
-end
-always @(data_o) begin
-    $display("EXMEM-data: %b", data_o);
 end
 
 endmodule

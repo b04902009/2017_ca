@@ -11,16 +11,7 @@ input               start_i;
 
 wire    [31:0]      inst_addr, inst;
 wire                Zero;
-// wire    [9:0]       ctrl_sig;
-// reg                 ALUOp, RegDst, ALUSrc, MemtoReg, RegWrite, MemWrite, MemRead;
 wire                Branch, Jump;
-// wire    [3:0]       IDEX_sig;
-// reg                 IDEX_ALUSrc, IDEX_RegDst;
-// reg     [1:0]       IDEX_ALUOp;
-// wire    [1:0]       EXMEM_sig;
-// reg                 EXMEM_MemRead, EXMEM_MemWrite;
-// wire    [1:0]       MEMWB_sig;
-// reg                 MEMWB_MemtoReg, MEMWB_RegWrite;
 wire    [31:0]      MUXforward2_data;
 
 IFID IFID(
@@ -253,21 +244,10 @@ ALU ALU(
     .Zero_o     (Zero)
 );
 
-
 ALU_Control ALU_Control(
     .funct_i    (IDEX.signextend_o[5:0]),
     .ALUOp_i    (IDEX.EX_o[2:1]),      // IDEX_ALUOp
     .ALUCtrl_o  (ALU.ALUCtrl_i)
 );
-
-// always @(EXMEM_sig) begin
-//     EXMEM_MemRead <= EXMEM_sig[1];
-//     EXMEM_MemWrite <= EXMEM_sig[0];
-// end
-
-// always @(posedge clk_i) begin
-//     MEMWB_RegWrite <= MEMWB_sig[1];
-//     MEMWB_MemtoReg <= MEMWB_sig[0];
-// end
 
 endmodule
