@@ -18,7 +18,7 @@ assign	IFIDhazard_o = hazard_o;
 assign	MUX_Control_hazard_o = hazard_o;
 
 // always@(*) begin
-//     $display("MemRead: %b", MemRead_i);
+//     $display("hazard_o: %b", hazard_o);
 // end
 
 endmodule

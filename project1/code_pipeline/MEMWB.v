@@ -24,7 +24,7 @@ reg     [4:0]       rd_o;
 reg     [31:0]      addr_o, data_o;
 
 
-always@(posedge clk_i or data_i) begin
+always@(posedge clk_i) begin
     if(~rst_i) begin
         WB_o <= 0;
         addr_o <= 0;
