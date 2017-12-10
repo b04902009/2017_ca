@@ -122,7 +122,7 @@ MUX_Add MUX_Add(
 
 MUX_Jump MUX_Jump(
     .data1_28_i (),               // from ShiftLeft26.data_o
-    .data1_32_i (Add_PC.data_o),
+    .data1_32_i (MUX_Add.data_o),
     .data2_i    (),               // from MUX_Add.data_o
     .select_i   (Jump),
     .data_o     (PC.pc_i)
