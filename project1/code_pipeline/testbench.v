@@ -57,7 +57,7 @@ initial begin
 end
   
 always@(negedge Clk) begin
-    if(counter == 70)    // stop after 70 cycles
+    if(counter == 64)    // stop after 70 cycles
         $stop;
 
     // put in your own signal to count stall and flush
