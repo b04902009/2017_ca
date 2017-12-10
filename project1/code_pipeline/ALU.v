@@ -2,8 +2,7 @@ module ALU(
 	data1_i,
 	data2_i,
     ALUCtrl_i,
-    data_o,
-    Zero_o
+    data_o
 );
 
 input	[31:0]		data1_i, data2_i;
@@ -19,5 +18,5 @@ assign	data_o = (ALUCtrl_i == 3'b000)?	data1_i & data2_i :
 				 (ALUCtrl_i == 3'b101)?	data1_i * data2_i :
 				 32'd0;
 
-assign	Zero_o = (data1_i == data2_i)?	1'b1 : 1'b0;
+//assign	Zero_o = (data1_i == data2_i)?	1'b1 : 1'b0;
 endmodule

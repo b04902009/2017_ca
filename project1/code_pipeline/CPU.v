@@ -202,6 +202,8 @@ Registers Registers(
     .RTdata_o   (IDEX.data2_i) 
 );
 
+assign Zero = (Registers.RSdata_o == Registers.RTdata_o) ? 1'b1 : 1'b0;
+
 MUX_Control MUX_Control(
     .hazard_i   (),                // from HazardDetection.MUX_Control_hazard_o
     .ctrl_sig_i (),                // from Control.ctrl_signal
@@ -240,8 +242,7 @@ ALU ALU(
     .data1_i    (),                // from MUXforward_1.data_o
     .data2_i    (),                // from MUX32.data_o
     .ALUCtrl_i  (),                // from ALU_Control.ALUCtrl_o
-    .data_o     (EXMEM.addr_i),
-    .Zero_o     (Zero)
+    .data_o     (EXMEM.addr_i)
 );
 
 ALU_Control ALU_Control(
