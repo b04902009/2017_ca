@@ -86,7 +86,9 @@ initial begin
     #(`CYCLE_TIME/4) 
     Reset = 1;
     Start = 1;
-
+    
+    $dumpfile("gg.vcd");
+    $dumpvars;
     
 end
   
