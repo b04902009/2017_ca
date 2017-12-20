@@ -1,7 +1,13 @@
 module CPU(
-    clk_i, 
+    clk_i,
     rst_i,
-    start_i
+    start_i,
+    mem_data_i, 
+    mem_ack_i,  
+    mem_data_o, 
+    mem_addr_o,     
+    mem_enable_o, 
+    mem_write_o
 );
 
 // Ports
@@ -13,6 +19,38 @@ wire    [31:0]      inst_addr, inst;
 wire                Zero;
 wire                Branch, Jump;
 wire    [31:0]      MUXforward2_data;
+
+// Data Memory interface
+input   [256-1:0]   mem_data_i;
+input               mem_ack_i; 
+output  [256-1:0]   mem_data_o;
+output  [32-1:0]    mem_addr_o;    
+output              mem_enable_o;
+output              mem_write_o;
+
+//data cache
+dcache_top dcache(
+    // System clock, reset and stall
+    .clk_i(clk_i), 
+    .rst_i(rst_i),
+    
+    // to Data Memory interface     
+    .mem_data_i(mem_data_i), 
+    .mem_ack_i(mem_ack_i),  
+    .mem_data_o(mem_data_o), 
+    .mem_addr_o(mem_addr_o),    
+    .mem_enable_o(mem_enable_o), 
+    .mem_write_o(mem_write_o), 
+    
+    // to CPU interface 
+    .p1_data_i(), 
+    .p1_addr_i(),   
+    .p1_MemRead_i(), 
+    .p1_MemWrite_i(), 
+    .p1_data_o(), 
+    .p1_stall_o()
+);
+
 
 IFID IFID(
     .clk_i      (clk_i),
@@ -135,15 +173,6 @@ MUX_Write MUX_Write(
     .data_o     (Registers.RDdata_i)                
 );
 
-DataMemory DataMemory(
-    .clk_i      (clk_i),
-    .addr_i     (),               // from EXMEM.addr_o
-    .Writedata_i(),               // from EXMEM.data_o               
-    .MemRead_i  (EXMEM.M_o[1]),
-    .MemWrite_i (EXMEM.M_o[0]),
-    .Readdata_o (MEMWB.data_i)
-);
-
 ShiftLeft26 ShiftLeft26(
     .data_i     (inst[25:0]),
     .data_o     (MUX_Jump.data1_28_i)
@@ -153,31 +182,28 @@ ShiftLeft32 ShiftLeft32(
     .data_i     (),               // from Sign_Extend.data_o
     .data_o     (Add_address.data2_in)
 );
-// OK
+
 Adder Add_address(
     .data1_in   (),               // from IFID.pc_o
     .data2_in   (),               // from ShiftLeft32.data_o
     .data_o     (MUX_Add.data2_i)
 );
 
-// OK
 Adder Add_PC(
     .data1_in   (inst_addr),
     .data2_in   (32'd4),
     .data_o     (IFID.pc_i)
 );
 
-
-//OK
 PC PC(
-    .clk_i      (clk_i),
-    .rst_i      (rst_i),
-    .start_i    (start_i),
-    .hazard_i   (),                // from HazardDetection.hazard_o
-    .pc_i       (),                // from MUX_Jump.data_o
-    .pc_o       (inst_addr)
+    .clk_i(clk_i),
+    .rst_i(rst_i),
+    .start_i(start_i),
+    .stall_i(),                     // from HazardDetection.hazard_o
+    .pcEnable_i(),
+    .pc_i(),                        // from MUX_Jump.data_o
+    .pc_o(inst_addr)
 );
-
 
 Instruction_Memory Instruction_Memory(
     .addr_i     (inst_addr), 

@@ -1,5 +1,5 @@
 module dcache_top(
-// System clock, reset and stall
+	// System clock, reset and stall
 	clk_i, 
 	rst_i,
 	

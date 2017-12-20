@@ -33,10 +33,9 @@ CPU CPU(
     .mem_write_o(cpu_mem_write)
 );
 
-Data_Memory Data_Memory
-(
+Data_Memory Data_Memory(
     .clk_i    (Clk),
-  .rst_i    (Reset),
+    .rst_i    (Reset),
     .addr_i   (cpu_mem_addr),
     .data_i   (cpu_mem_data),
     .enable_i (cpu_mem_enable),
@@ -159,7 +158,6 @@ always@(posedge Clk) begin
         flag = 1'b0;
     end
         
-    
     counter = counter + 1;
 end
 
