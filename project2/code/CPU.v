@@ -43,14 +43,22 @@ dcache_top dcache(
     .mem_write_o(mem_write_o), 
     
     // to CPU interface 
-    .p1_data_i(), 
-    .p1_addr_i(),   
-    .p1_MemRead_i(), 
-    .p1_MemWrite_i(), 
-    .p1_data_o(), 
+    .p1_data_i(),                   // from EXMEM.data_o
+    .p1_addr_i(),                   // from EXMEM.addr_o
+    .p1_MemRead_i(EXMEM.M_o[1]), 
+    .p1_MemWrite_i(EXMEM.M_o[0]), 
+    .p1_data_o(MEMWB.data_i), 
     .p1_stall_o()
 );
 
+// DataMemory DataMemory(
+//     .clk_i      (clk_i),
+//     .addr_i     (),               // from EXMEM.addr_o
+//     .Writedata_i(),               // from EXMEM.data_o               
+//     .MemRead_i  (EXMEM.M_o[1]),
+//     .MemWrite_i (EXMEM.M_o[0]),
+//     .Readdata_o (MEMWB.data_i)
+// );
 
 IFID IFID(
     .clk_i      (clk_i),
@@ -59,6 +67,7 @@ IFID IFID(
     .hazard_i   (),               // from HazardDetection.IDIFhazard_o
     .flush_i    (),               // from Flush.flush_o
     .inst_i     (),               // from Instruction_Memory.instr_o
+    .halt_i     (dcache.p1_stall_o),
     .inst_o     (inst),
     .pc_o       (Add_address.data1_in)
 );
@@ -75,6 +84,7 @@ IDEX IDEX(
     .rs_i       (inst[25:21]),
     .rt_i       (inst[20:16]),
     .rd_i       (inst[15:11]),
+    .halt_i     (dcache.p1_stall_o),
     .WB_o       (EXMEM.WB_i),
     .M_o        (EXMEM.M_i),
     .EX_o       (),
@@ -94,10 +104,11 @@ EXMEM EXMEM(
     .addr_i     (),                // from ALU.data_o
     .data_i     (MUXforward2_data),
     .rd_i       (),                // from MUX5.data_o
+    .halt_i     (dcache.p1_stall_o),
     .WB_o       (MEMWB.WB_i),
     .M_o        (),
-    .addr_o     (DataMemory.addr_i),
-    .data_o     (DataMemory.Writedata_i),
+    .addr_o     (dcache.p1_addr_i),
+    .data_o     (dcache.p1_data_i),
     .rd_o       (MEMWB.rd_i)
 );
 
@@ -108,6 +119,7 @@ MEMWB MEMWB(
     .addr_i     (EXMEM.addr_o),    // from EXMEM.addr_o
     .data_i     (),                // from DataMemory.Readdata_o
     .rd_i       (),                // from EXMEM.rd_o
+    .halt_i     (dcache.p1_stall_o),
     .WB_o       (),
     .addr_o     (MUX_Write.data2_i), // here makes mistake ..
     .data_o     (MUX_Write.data1_i),
@@ -145,7 +157,7 @@ HazardDetection HazardDetection(
     .inst_i     (inst), 
     .rt_i       (IDEX.rt_o), 
     .MemRead_i  (IDEX.M_o[1]), 
-    .hazard_o   (PC.hazard_i), 
+    .hazard_o   (PC.stall_i), 
     .IFIDhazard_o(IFID.hazard_i), 
     .MUX_Control_hazard_o(MUX_Control.hazard_i)
 );
@@ -200,7 +212,7 @@ PC PC(
     .rst_i(rst_i),
     .start_i(start_i),
     .stall_i(),                     // from HazardDetection.hazard_o
-    .pcEnable_i(),
+    .halt_i(dcache.p1_stall_o),
     .pc_i(),                        // from MUX_Jump.data_o
     .pc_o(inst_addr)
 );

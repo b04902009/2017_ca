@@ -6,6 +6,7 @@ module EXMEM(
     addr_i,
     data_i,
     rd_i,
+    halt_i,
     WB_o,
     M_o,
     addr_o,
@@ -13,7 +14,7 @@ module EXMEM(
     rd_o
 );
 
-input               clk_i, rst_i;
+input               clk_i, rst_i, halt_i;
 input   [1:0]       WB_i, M_i;
 input   [4:0]       rd_i;
 input   [31:0]      addr_i, data_i;
@@ -34,7 +35,7 @@ always@(posedge clk_i or negedge rst_i) begin
         data_o <= 0;
         rd_o <= 0;
     end
-    else begin
+    else if(~halt_i) begin
         WB_o <= WB_i;
         M_o <= M_i;
         addr_o <= addr_i;

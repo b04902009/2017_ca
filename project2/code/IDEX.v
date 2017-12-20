@@ -10,6 +10,7 @@ module IDEX(
     rs_i,
     rt_i,
     rd_i,
+    halt_i,
     WB_o,
     M_o,
     EX_o,
@@ -21,7 +22,7 @@ module IDEX(
     rd_o
 );
 
-input				clk_i, rst_i;
+input				clk_i, rst_i, halt_i;
 input	[1:0]		WB_i, M_i;
 input	[3:0]		EX_i;
 input	[4:0]		rs_i, rt_i, rd_i;
@@ -50,7 +51,7 @@ always@(posedge clk_i or negedge rst_i) begin
 		rt_o <= 0;
 		rd_o <= 0;
 	end
-	else begin
+	else if(~halt_i) begin
 		WB_o <= WB_i;
 		M_o <= M_i;
 		EX_o <= EX_i;
