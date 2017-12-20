@@ -37,7 +37,7 @@ assign	ack_o = ack;
 assign	addr = addr_i>>5;
 assign	data_o = data;
 
-//Controller 
+// Controller 
 always@(posedge clk_i) begin
 	if(~rst_i) begin
 		state <= STATE_IDLE;
